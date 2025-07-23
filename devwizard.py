@@ -9,8 +9,15 @@ import shutil
 import argparse
 import subprocess
 import logging
+import platform
 from datetime import datetime
 from pathlib import Path
+
+# Import platform utilities
+from platform_utils import get_platform, get_tool_path, create_install_script, run_install_script, open_file_with_default_app
+
+# Import system monitoring
+from system_monitor import monitor_system
 
 # Constants
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "devwizard_config.json")
@@ -44,28 +51,61 @@ def load_config():
 
 def create_default_config():
     """Create default configuration"""
+    current_platform = get_platform()
+    
+    # Platform-specific defaults
+    if current_platform == "windows":
+        cleanup_dirs = ["%TEMP%", "%USERPROFILE%\\Downloads"]
+        git_path = "C:\\Program Files\\Git\\bin\\git.exe"
+        docker_path = "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe"
+        kubectl_path = "%USERPROFILE%\\.kubectl\\kubectl.exe"
+        terraform_dir = "%USERPROFILE%\\terraform"
+        terminal_path = "wt"
+    elif current_platform == "macos":
+        cleanup_dirs = ["/tmp", "~/Downloads"]
+        git_path = "/usr/bin/git"
+        docker_path = "/usr/local/bin/docker"
+        kubectl_path = "/usr/local/bin/kubectl"
+        terraform_dir = "~/terraform"
+        terminal_path = "open -a Terminal"
+    else:  # linux
+        cleanup_dirs = ["/tmp", "~/Downloads"]
+        git_path = "/usr/bin/git"
+        docker_path = "/usr/bin/docker"
+        kubectl_path = "/usr/local/bin/kubectl"
+        terraform_dir = "~/terraform"
+        terminal_path = "x-terminal-emulator"
+    
     config = {
         "workspace": {
-            "cleanup_dirs": [
-                "%TEMP%",
-                "%USERPROFILE%\\Downloads"
-            ],
+            "cleanup_dirs": cleanup_dirs,
             "cleanup_extensions": [".tmp", ".log", ".bak"],
             "min_age_days": 7
         },
         "tools": {
-            "git_path": "C:\\Program Files\\Git\\bin\\git.exe",
-            "docker_path": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
-            "kubectl_path": "%USERPROFILE%\\.kubectl\\kubectl.exe"
+            "git_path": git_path,
+            "docker_path": docker_path,
+            "kubectl_path": kubectl_path
         },
         "cloud": {
             "aws_region": "us-east-1",
             "aws_profile": "default",
-            "terraform_dir": "%USERPROFILE%\\terraform"
+            "terraform_dir": terraform_dir
         },
         "apps": [
-            {"name": "VS Code", "path": "code"},
-            {"name": "Terminal", "path": "wt"}
+            {
+                "name": "VS Code", 
+                "path": "code",
+                "platform_paths": {
+                    "windows": "code",
+                    "macos": "/Applications/Visual Studio Code.app",
+                    "linux": "code"
+                }
+            },
+            {
+                "name": "Terminal", 
+                "path": terminal_path
+            }
         ]
     }
     
@@ -128,19 +168,20 @@ def check_tools(config):
     print("🔧 Checking DevOps tools...")
     
     tools = config.get("tools", {})
+    current_platform = get_platform()
     
     # Define tools to check with their paths or commands
     tools_to_check = {
         "Git": {
-            "path": expand_path(tools.get("git_path", "C:\\Program Files\\Git\\bin\\git.exe")),
+            "path": expand_path(tools.get("git_path", get_tool_path("git", current_platform))),
             "command": "git --version"
         },
         "Docker": {
-            "path": expand_path(tools.get("docker_path", "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe")),
+            "path": expand_path(tools.get("docker_path", get_tool_path("docker", current_platform))),
             "command": "docker --version"
         },
         "kubectl": {
-            "path": expand_path(tools.get("kubectl_path", "%USERPROFILE%\\.kubectl\\kubectl.exe")),
+            "path": expand_path(tools.get("kubectl_path", get_tool_path("kubectl", current_platform))),
             "command": "kubectl version --client"
         },
         "Terraform": {
@@ -308,20 +349,19 @@ def install_tools():
         print("Installation cancelled.")
         return
     
+    # Get current platform
+    current_platform = get_platform()
+    
     # Path to the installation script
-    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "install_tools.ps1")
+    script_ext = ".ps1" if current_platform == "windows" else ".sh"
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"install_tools{script_ext}")
     
     # Create the installation script with selected tools
-    create_install_script(script_path, selected_tools)
+    create_install_script(script_path, selected_tools, current_platform)
     
-    # Run the installation script with admin privileges
-    print("  Launching installer with admin privileges...")
-    subprocess.Popen([
-        "powershell", 
-        "-ExecutionPolicy", "Bypass", 
-        "-Command", 
-        f"Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"{script_path}\"' -Verb RunAs"
-    ], shell=True)
+    # Run the installation script with appropriate privileges
+    print(f"  Launching installer for {current_platform}...")
+    run_install_script(script_path, current_platform)
     
     print("  Installation started in a new window.")
     input("  Press Enter when installation is complete...")
@@ -508,80 +548,33 @@ Read-Host "Press Enter to exit"
     with open(path, 'w') as f:
         f.write(script_content)
 
-def monitor_system():
-    """Monitor system resources"""
-    print("📊 System Monitor")
-    
-    # Simple CPU usage
-    try:
-        ps_cmd = "powershell -Command \"Get-Counter '\\Processor(_Total)\\% Processor Time' | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue\""
-        cpu_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
-        cpu_usage = float(cpu_result.stdout.strip())
-        print(f"  CPU Usage: {cpu_usage:.1f}%")
-    except:
-        print("  CPU Usage: Unable to retrieve")
-    
-    # Simple memory usage
-    try:
-        ps_cmd = "powershell -Command \"$CompObject = Get-WmiObject -Class WIN32_OperatingSystem; "
-        ps_cmd += "$TotalMemory = [math]::round($CompObject.TotalVisibleMemorySize / 1024, 0); "
-        ps_cmd += "$FreeMemory = [math]::round($CompObject.FreePhysicalMemory / 1024, 0); "
-        ps_cmd += "$UsedMemory = $TotalMemory - $FreeMemory; "
-        ps_cmd += "$MemoryUsage = [math]::round(($UsedMemory / $TotalMemory) * 100, 2); "
-        ps_cmd += "Write-Output \"$MemoryUsage,$UsedMemory,$TotalMemory\"\""
-        
-        mem_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
-        mem_values = mem_result.stdout.strip().split(',')
-        
-        mem_percent = float(mem_values[0])
-        used_mem = float(mem_values[1])
-        total_mem = float(mem_values[2])
-        print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.0f} MB / {total_mem:.0f} MB)")
-    except:
-        print("  Memory Usage: Unable to retrieve")
-    
-    # Simple disk usage
-    try:
-        ps_cmd = "powershell -Command \"Get-PSDrive -PSProvider FileSystem | ForEach-Object {$_.Name + ',' + [math]::Round(($_.Used/($_.Used+$_.Free))*100,1) + ',' + [math]::Round($_.Used/1GB,1) + ',' + [math]::Round(($_.Used+$_.Free)/1GB,1)}\""
-        disk_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
-        disk_lines = disk_result.stdout.strip().split('\n')
-        
-        print("  Disk Usage:")
-        for line in disk_lines:
-            parts = line.split(',')
-            if len(parts) == 4:
-                drive = parts[0] + ":"
-                usage_percent = float(parts[1])
-                used_space = float(parts[2])
-                total_space = float(parts[3])
-                print(f"    {drive}: {usage_percent:.1f}% used ({used_space:.1f} GB / {total_space:.1f} GB)")
-    except:
-        print("  Disk Usage: Unable to retrieve")
-    
-    # Simple process count
-    try:
-        ps_cmd = "powershell -Command \"(Get-Process).Count\""
-        process_count = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
-        print(f"  Processes: {process_count} running")
-    except:
-        print("  Processes: Unable to retrieve")
-
 
 def launch_apps(config):
     """Launch configured applications"""
     print("🚀 Launching applications...")
     
+    current_platform = get_platform()
     apps = config.get("apps", [])
     launched = 0
     
     for app in apps:
         name = app.get("name", "")
         path = app.get("path", "")
+        platform_paths = app.get("platform_paths", {})
+        
+        # Use platform-specific path if available
+        if current_platform in platform_paths:
+            path = platform_paths[current_platform]
         
         if path:
             try:
                 print(f"  Starting {name}...")
-                subprocess.Popen(path, shell=True)
+                if current_platform == "windows":
+                    subprocess.Popen(path, shell=True)
+                elif current_platform == "macos":
+                    subprocess.Popen(["open", path])
+                elif current_platform == "linux":
+                    subprocess.Popen(path, shell=True)
                 launched += 1
             except Exception as e:
                 print(f"  Error launching {name}: {e}")

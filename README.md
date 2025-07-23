@@ -1,6 +1,6 @@
 # DevWizard 🧙‍♂️
 
-A magical CLI tool for cloud and DevOps engineers to streamline your Windows workflow.
+A magical CLI tool for cloud and DevOps engineers to streamline your workflow across Windows, macOS, and Linux.
 
 ```
  _____              _    _ _                       _ 
@@ -29,14 +29,22 @@ A magical CLI tool for cloud and DevOps engineers to streamline your Windows wor
 
 1. Ensure you have Python 3.6+ installed
 2. Clone this repository
-3. Install required tools (optional):
-   - Git for Windows (for Git helper)
-   - Docker Desktop (for Docker helper)
+3. Install required Python dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+4. Install required tools (optional):
+   - Git (for Git helper)
+   - Docker (for Docker helper)
    - kubectl (for Kubernetes helper)
    - AWS CLI (for AWS helper)
-4. Run the tool:
+5. Run the tool:
    ```
+   # On Windows
    python devwizard.py
+   
+   # On macOS/Linux
+   python3 devwizard.py
    ```
 
 ## Usage
