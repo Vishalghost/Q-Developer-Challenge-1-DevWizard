@@ -21,11 +21,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # ASCII Art Logo
 LOGO = """
  _____              _    _ _                       _ 
-|  __ \\            | |  | (_)                     | |
+|  __ \            | |  | (_)                     | |
 | |  | | _____   __| |  | |_ ______ _ _ __ __ _  | |
-| |  | |/ _ \\ \\ / /| |/\\| | |_  / _` | '__/ _` | | |
-| |__| |  __/\\ V / \\  /\\  / |/ / (_| | | | (_| | |_|
-|_____/ \\___| \\_/   \\/  \\/|_/___\\__,_|_|  \\__,_| (_)
+| |  | |/ _ \ \ / /| |/\| | |_  / _` | '__/ _` | | |
+| |__| |  __/\ V / \  /\  / |/ / (_| | | | (_| | |_|
+|_____/ \___| \_/   \/  \/|_/___\__,_|_|  \__,_| (_)
                                                    
         Your Magical DevOps Assistant - v1.0.0
 """
@@ -128,29 +128,140 @@ def check_tools(config):
     print("🔧 Checking DevOps tools...")
     
     tools = config.get("tools", {})
-    git_path = expand_path(tools.get("git_path", ""))
-    docker_path = expand_path(tools.get("docker_path", ""))
-    kubectl_path = expand_path(tools.get("kubectl_path", ""))
     
-    # Check Git
-    git_ok = os.path.exists(git_path)
-    print(f"  Git: {'✅ Installed' if git_ok else '❌ Not found'}")
+    # Define tools to check with their paths or commands
+    tools_to_check = {
+        "Git": {
+            "path": expand_path(tools.get("git_path", "C:\\Program Files\\Git\\bin\\git.exe")),
+            "command": "git --version"
+        },
+        "Docker": {
+            "path": expand_path(tools.get("docker_path", "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe")),
+            "command": "docker --version"
+        },
+        "kubectl": {
+            "path": expand_path(tools.get("kubectl_path", "%USERPROFILE%\\.kubectl\\kubectl.exe")),
+            "command": "kubectl version --client"
+        },
+        "Terraform": {
+            "path": "",
+            "command": "terraform --version"
+        },
+        "AWS CLI": {
+            "path": "",
+            "command": "aws --version"
+        },
+        "Azure CLI": {
+            "path": "",
+            "command": "az --version"
+        },
+        "Google Cloud SDK": {
+            "path": "",
+            "command": "gcloud --version"
+        },
+        "Ansible": {
+            "path": "",
+            "command": "ansible --version"
+        },
+        "Jenkins CLI": {
+            "path": "",
+            "command": "jenkins-cli -v"
+        },
+        "Helm": {
+            "path": "",
+            "command": "helm version --short"
+        },
+        "Vagrant": {
+            "path": "",
+            "command": "vagrant --version"
+        },
+        "Packer": {
+            "path": "",
+            "command": "packer --version"
+        },
+        "Maven": {
+            "path": "",
+            "command": "mvn --version"
+        },
+        "Gradle": {
+            "path": "",
+            "command": "gradle --version"
+        },
+        "Node.js": {
+            "path": "",
+            "command": "node --version"
+        },
+        "npm": {
+            "path": "",
+            "command": "npm --version"
+        },
+        "Python": {
+            "path": "",
+            "command": "python --version"
+        }
+    }
     
-    # Check Docker
-    docker_ok = os.path.exists(docker_path)
-    print(f"  Docker: {'✅ Installed' if docker_ok else '❌ Not found'}")
+    # Track which tools are installed
+    installed_tools = []
+    missing_tools = []
     
-    # Check kubectl
-    kubectl_ok = os.path.exists(kubectl_path)
-    print(f"  kubectl: {'✅ Installed' if kubectl_ok else '❌ Not found'}")
+    print("\n  Checking core tools:")
+    # Check Git, Docker, and kubectl first (core tools)
+    for tool_name in ["Git", "Docker", "kubectl"]:
+        tool_info = tools_to_check[tool_name]
+        tool_path = tool_info["path"]
+        tool_cmd = tool_info["command"]
+        
+        # First check if the path exists
+        if tool_path and os.path.exists(tool_path):
+            print(f"  {tool_name}: ✅ Installed")
+            installed_tools.append(tool_name)
+        else:
+            # Try running the command
+            try:
+                result = subprocess.run(tool_cmd, shell=True, capture_output=True, text=True)
+                if result.returncode == 0:
+                    print(f"  {tool_name}: ✅ Installed")
+                    installed_tools.append(tool_name)
+                else:
+                    print(f"  {tool_name}: ❌ Not found")
+                    missing_tools.append(tool_name)
+            except:
+                print(f"  {tool_name}: ❌ Not found")
+                missing_tools.append(tool_name)
     
-    if not (git_ok and docker_ok and kubectl_ok):
-        print("\nSome tools are missing. Would you like to install them?")
-        choice = input("Install missing tools? (y/n): ")
+    print("\n  Checking additional DevOps tools:")
+    # Check other tools
+    for tool_name, tool_info in tools_to_check.items():
+        if tool_name in ["Git", "Docker", "kubectl"]:
+            continue  # Skip core tools already checked
+            
+        tool_cmd = tool_info["command"]
+        
+        # Try running the command
+        try:
+            result = subprocess.run(tool_cmd, shell=True, capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"  {tool_name}: ✅ Installed")
+                installed_tools.append(tool_name)
+            else:
+                print(f"  {tool_name}: ❌ Not found")
+                missing_tools.append(tool_name)
+        except:
+            print(f"  {tool_name}: ❌ Not found")
+            missing_tools.append(tool_name)
+    
+    print(f"\n  Found {len(installed_tools)} of {len(tools_to_check)} tools installed")
+    
+    # Check if core tools are missing
+    core_missing = any(tool in missing_tools for tool in ["Git", "Docker", "kubectl"])
+    if core_missing:
+        print("\nSome core tools are missing. Would you like to install them?")
+        choice = input("Install missing core tools? (y/n): ")
         if choice.lower() == 'y':
             install_tools()
     
-    return git_ok and docker_ok and kubectl_ok
+    return len(missing_tools) == 0
 
 def install_tools():
     """Install missing DevOps tools"""
@@ -238,7 +349,7 @@ def monitor_system():
     
     # Simple CPU usage
     try:
-        ps_cmd = "powershell -Command ""Get-Counter '\\Processor(_Total)\\% Processor Time' | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue"""
+        ps_cmd = "powershell -Command \"Get-Counter '\\Processor(_Total)\\% Processor Time' | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue\""
         cpu_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
         cpu_usage = float(cpu_result.stdout.strip())
         print(f"  CPU Usage: {cpu_usage:.1f}%")
@@ -247,12 +358,12 @@ def monitor_system():
     
     # Simple memory usage
     try:
-        ps_cmd = "powershell -Command ""$CompObject = Get-WmiObject -Class WIN32_OperatingSystem; "
+        ps_cmd = "powershell -Command \"$CompObject = Get-WmiObject -Class WIN32_OperatingSystem; "
         ps_cmd += "$TotalMemory = [math]::round($CompObject.TotalVisibleMemorySize / 1024, 0); "
         ps_cmd += "$FreeMemory = [math]::round($CompObject.FreePhysicalMemory / 1024, 0); "
         ps_cmd += "$UsedMemory = $TotalMemory - $FreeMemory; "
         ps_cmd += "$MemoryUsage = [math]::round(($UsedMemory / $TotalMemory) * 100, 2); "
-        ps_cmd += "Write-Output \"$MemoryUsage,$UsedMemory,$TotalMemory\""""
+        ps_cmd += "Write-Output \"$MemoryUsage,$UsedMemory,$TotalMemory\"\""
         
         mem_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
         mem_values = mem_result.stdout.strip().split(',')
@@ -266,7 +377,7 @@ def monitor_system():
     
     # Simple disk usage
     try:
-        ps_cmd = "powershell -Command ""Get-PSDrive -PSProvider FileSystem | ForEach-Object {$_.Name + ',' + [math]::Round(($_.Used/($_.Used+$_.Free))*100,1) + ',' + [math]::Round($_.Used/1GB,1) + ',' + [math]::Round(($_.Used+$_.Free)/1GB,1)}"""
+        ps_cmd = "powershell -Command \"Get-PSDrive -PSProvider FileSystem | ForEach-Object {$_.Name + ',' + [math]::Round(($_.Used/($_.Used+$_.Free))*100,1) + ',' + [math]::Round($_.Used/1GB,1) + ',' + [math]::Round(($_.Used+$_.Free)/1GB,1)}\""
         disk_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
         disk_lines = disk_result.stdout.strip().split('\n')
         
@@ -284,7 +395,7 @@ def monitor_system():
     
     # Simple process count
     try:
-        ps_cmd = "powershell -Command ""(Get-Process).Count"""
+        ps_cmd = "powershell -Command \"(Get-Process).Count\""
         process_count = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
         print(f"  Processes: {process_count} running")
     except:
@@ -441,58 +552,6 @@ def kubernetes_helper():
     print("7. Get logs")
     print("8. Switch context")
     print("9. Return to main menu")
-
-def aws_helper():
-    """AWS helper function"""
-    print("☁️ AWS Helper")
-    print("\n1. List EC2 instances")
-    print("2. List S3 buckets")
-    print("3. List Lambda functions")
-    print("4. Describe EC2 instance")
-    print("5. Start EC2 instance")
-    print("6. Stop EC2 instance")
-    print("7. Switch AWS profile")
-    print("8. Check AWS service status")
-    print("9. Return to main menu")
-    
-    choice = input("\nEnter your choice (1-9): ")
-    
-    if choice == "1":
-        print("\nListing EC2 instances...")
-        subprocess.run("aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,InstanceType,PublicIpAddress]' --output table", shell=True)
-    elif choice == "2":
-        print("\nListing S3 buckets...")
-        subprocess.run("aws s3 ls", shell=True)
-    elif choice == "3":
-        print("\nListing Lambda functions...")
-        subprocess.run("aws lambda list-functions --query 'Functions[*].[FunctionName,Runtime,Timeout,MemorySize]' --output table", shell=True)
-    elif choice == "4":
-        instance_id = input("Enter EC2 instance ID: ")
-        print(f"\nDescribing EC2 instance {instance_id}...")
-        subprocess.run(f"aws ec2 describe-instances --instance-ids {instance_id}", shell=True)
-    elif choice == "5":
-        instance_id = input("Enter EC2 instance ID: ")
-        print(f"\nStarting EC2 instance {instance_id}...")
-        subprocess.run(f"aws ec2 start-instances --instance-ids {instance_id}", shell=True)
-    elif choice == "6":
-        instance_id = input("Enter EC2 instance ID: ")
-        print(f"\nStopping EC2 instance {instance_id}...")
-        subprocess.run(f"aws ec2 stop-instances --instance-ids {instance_id}", shell=True)
-    elif choice == "7":
-        print("\nAvailable AWS profiles:")
-        subprocess.run("aws configure list-profiles", shell=True)
-        profile = input("\nEnter profile name to switch to: ")
-        print(f"\nSwitching to profile {profile}...")
-        os.environ["AWS_PROFILE"] = profile
-        print(f"AWS_PROFILE environment variable set to {profile}")
-        print("Note: This only affects the current session")
-    elif choice == "8":
-        print("\nChecking AWS service status...")
-        subprocess.run("aws health describe-events --filter eventTypeCategories=issue --region us-east-1", shell=True)
-    elif choice == "9":
-        return
-    else:
-        print("Invalid choice.")
     
     choice = input("\nEnter your choice (1-9): ")
     
@@ -550,6 +609,58 @@ def aws_helper():
         context = input("\nEnter context name to switch to: ")
         print(f"\nSwitching to context {context}...")
         subprocess.run(f"kubectl config use-context {context}", shell=True)
+    elif choice == "9":
+        return
+    else:
+        print("Invalid choice.")
+
+def aws_helper():
+    """AWS helper function"""
+    print("☁️ AWS Helper")
+    print("\n1. List EC2 instances")
+    print("2. List S3 buckets")
+    print("3. List Lambda functions")
+    print("4. Describe EC2 instance")
+    print("5. Start EC2 instance")
+    print("6. Stop EC2 instance")
+    print("7. Switch AWS profile")
+    print("8. Check AWS service status")
+    print("9. Return to main menu")
+    
+    choice = input("\nEnter your choice (1-9): ")
+    
+    if choice == "1":
+        print("\nListing EC2 instances...")
+        subprocess.run("aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,InstanceType,PublicIpAddress]' --output table", shell=True)
+    elif choice == "2":
+        print("\nListing S3 buckets...")
+        subprocess.run("aws s3 ls", shell=True)
+    elif choice == "3":
+        print("\nListing Lambda functions...")
+        subprocess.run("aws lambda list-functions --query 'Functions[*].[FunctionName,Runtime,Timeout,MemorySize]' --output table", shell=True)
+    elif choice == "4":
+        instance_id = input("Enter EC2 instance ID: ")
+        print(f"\nDescribing EC2 instance {instance_id}...")
+        subprocess.run(f"aws ec2 describe-instances --instance-ids {instance_id}", shell=True)
+    elif choice == "5":
+        instance_id = input("Enter EC2 instance ID: ")
+        print(f"\nStarting EC2 instance {instance_id}...")
+        subprocess.run(f"aws ec2 start-instances --instance-ids {instance_id}", shell=True)
+    elif choice == "6":
+        instance_id = input("Enter EC2 instance ID: ")
+        print(f"\nStopping EC2 instance {instance_id}...")
+        subprocess.run(f"aws ec2 stop-instances --instance-ids {instance_id}", shell=True)
+    elif choice == "7":
+        print("\nAvailable AWS profiles:")
+        subprocess.run("aws configure list-profiles", shell=True)
+        profile = input("\nEnter profile name to switch to: ")
+        print(f"\nSwitching to profile {profile}...")
+        os.environ["AWS_PROFILE"] = profile
+        print(f"AWS_PROFILE environment variable set to {profile}")
+        print("Note: This only affects the current session")
+    elif choice == "8":
+        print("\nChecking AWS service status...")
+        subprocess.run("aws health describe-events --filter eventTypeCategories=issue --region us-east-1", shell=True)
     elif choice == "9":
         return
     else:

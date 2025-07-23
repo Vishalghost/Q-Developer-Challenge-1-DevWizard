@@ -16,7 +16,7 @@ A magical CLI tool for cloud and DevOps engineers to streamline your Windows wor
 ## Features
 
 - **Workspace Cleanup**: Remove temporary files with a single command
-- **DevOps Tools Check**: Verify if Git, Docker, and kubectl are installed
+- **DevOps Tools Check**: Verify if Git, Docker, kubectl, Terraform, AWS CLI, Ansible, and many other DevOps tools are installed
 - **System Monitoring**: Check CPU, memory, and disk usage in real-time
 - **Application Launcher**: Start your development tools with one command
 - **Tool Installer**: Easily install Git, Docker, and kubectl
