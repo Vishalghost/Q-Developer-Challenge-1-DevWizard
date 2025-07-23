@@ -17,10 +17,12 @@ A magical CLI tool for cloud and DevOps engineers to streamline your Windows wor
 
 - **Workspace Cleanup**: Remove temporary files with a single command
 - **DevOps Tools Check**: Verify if Git, Docker, and kubectl are installed
-- **System Monitoring**: Check CPU, memory, and disk usage
+- **System Monitoring**: Check CPU, memory, and disk usage in real-time
 - **Application Launcher**: Start your development tools with one command
 - **Tool Installer**: Easily install Git, Docker, and kubectl
-- **Git Helper**: Streamline common Git operations
+- **Git Helper**: Streamline common Git operations (init, clone, commit, push)
+- **Docker Helper**: Manage containers and images with ease
+- **Kubernetes Helper**: Simplify kubectl commands and cluster management
 
 ## Installation
 
@@ -49,6 +51,40 @@ python devwizard.py --launch    # Launch applications
 python devwizard.py --install   # Install DevOps tools
 python devwizard.py --config    # Edit configuration
 ```
+
+## DevOps Features
+
+### Git Helper
+- Initialize repositories
+- Clone repositories
+- Check status
+- Add and commit changes
+- Push and pull changes
+
+### Docker Helper
+- List containers and images
+- Run and manage containers
+- Pull images
+- Docker Compose operations
+
+### Kubernetes Helper
+- Get pods, services, and deployments
+- Describe resources
+- Apply YAML files
+- Get logs
+- Switch contexts
+
+## System Features
+
+### System Monitoring
+- Real-time CPU usage
+- Memory usage in MB
+- Disk space utilization
+- Process count
+
+### Workspace Cleanup
+- Remove temporary files based on age and extension
+- Configurable cleanup directories
 
 ## Created with Amazon Q Developer
 

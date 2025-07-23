@@ -367,6 +367,142 @@ def git_helper():
     else:
         print("Invalid choice.")
 
+def docker_helper():
+    """Docker helper function"""
+    print("🚀 Docker Helper")
+    print("\n1. List containers")
+    print("2. List images")
+    print("3. Run container")
+    print("4. Stop container")
+    print("5. Remove container")
+    print("6. Pull image")
+    print("7. Docker Compose up")
+    print("8. Docker Compose down")
+    print("9. Return to main menu")
+    
+    choice = input("\nEnter your choice (1-9): ")
+    
+    if choice == "1":
+        print("\nListing containers...")
+        subprocess.run("docker ps -a", shell=True)
+    elif choice == "2":
+        print("\nListing images...")
+        subprocess.run("docker images", shell=True)
+    elif choice == "3":
+        image = input("Enter image name: ")
+        name = input("Enter container name (or press Enter for random name): ").strip()
+        ports = input("Enter port mapping (e.g., 8080:80) or press Enter to skip: ").strip()
+        cmd = f"docker run -d"
+        if name:
+            cmd += f" --name {name}"
+        if ports:
+            cmd += f" -p {ports}"
+        cmd += f" {image}"
+        print(f"\nRunning container: {cmd}")
+        subprocess.run(cmd, shell=True)
+    elif choice == "4":
+        container = input("Enter container ID or name: ")
+        print(f"\nStopping container {container}...")
+        subprocess.run(f"docker stop {container}", shell=True)
+    elif choice == "5":
+        container = input("Enter container ID or name: ")
+        force = input("Force removal? (y/n): ").lower() == 'y'
+        cmd = f"docker rm {container}"
+        if force:
+            cmd += " -f"
+        print(f"\nRemoving container {container}...")
+        subprocess.run(cmd, shell=True)
+    elif choice == "6":
+        image = input("Enter image name: ")
+        print(f"\nPulling image {image}...")
+        subprocess.run(f"docker pull {image}", shell=True)
+    elif choice == "7":
+        path = input("Enter docker-compose.yml directory (or press Enter for current directory): ").strip() or "."
+        print(f"\nRunning docker-compose up in {path}...")
+        subprocess.run(f"cd {path} && docker-compose up -d", shell=True)
+    elif choice == "8":
+        path = input("Enter docker-compose.yml directory (or press Enter for current directory): ").strip() or "."
+        print(f"\nRunning docker-compose down in {path}...")
+        subprocess.run(f"cd {path} && docker-compose down", shell=True)
+    elif choice == "9":
+        return
+    else:
+        print("Invalid choice.")
+
+def kubernetes_helper():
+    """Kubernetes helper function"""
+    print("☸️ Kubernetes Helper")
+    print("\n1. Get pods")
+    print("2. Get services")
+    print("3. Get deployments")
+    print("4. Describe resource")
+    print("5. Apply YAML file")
+    print("6. Delete resource")
+    print("7. Get logs")
+    print("8. Switch context")
+    print("9. Return to main menu")
+    
+    choice = input("\nEnter your choice (1-9): ")
+    
+    if choice == "1":
+        namespace = input("Enter namespace (or press Enter for all namespaces): ").strip()
+        cmd = "kubectl get pods"
+        if namespace:
+            cmd += f" -n {namespace}"
+        else:
+            cmd += " --all-namespaces"
+        print("\nGetting pods...")
+        subprocess.run(cmd, shell=True)
+    elif choice == "2":
+        namespace = input("Enter namespace (or press Enter for all namespaces): ").strip()
+        cmd = "kubectl get services"
+        if namespace:
+            cmd += f" -n {namespace}"
+        else:
+            cmd += " --all-namespaces"
+        print("\nGetting services...")
+        subprocess.run(cmd, shell=True)
+    elif choice == "3":
+        namespace = input("Enter namespace (or press Enter for all namespaces): ").strip()
+        cmd = "kubectl get deployments"
+        if namespace:
+            cmd += f" -n {namespace}"
+        else:
+            cmd += " --all-namespaces"
+        print("\nGetting deployments...")
+        subprocess.run(cmd, shell=True)
+    elif choice == "4":
+        resource_type = input("Enter resource type (pod, service, deployment, etc.): ")
+        resource_name = input("Enter resource name: ")
+        namespace = input("Enter namespace: ")
+        print(f"\nDescribing {resource_type} {resource_name} in namespace {namespace}...")
+        subprocess.run(f"kubectl describe {resource_type} {resource_name} -n {namespace}", shell=True)
+    elif choice == "5":
+        yaml_file = input("Enter path to YAML file: ")
+        print(f"\nApplying {yaml_file}...")
+        subprocess.run(f"kubectl apply -f {yaml_file}", shell=True)
+    elif choice == "6":
+        resource_type = input("Enter resource type (pod, service, deployment, etc.): ")
+        resource_name = input("Enter resource name: ")
+        namespace = input("Enter namespace: ")
+        print(f"\nDeleting {resource_type} {resource_name} in namespace {namespace}...")
+        subprocess.run(f"kubectl delete {resource_type} {resource_name} -n {namespace}", shell=True)
+    elif choice == "7":
+        pod_name = input("Enter pod name: ")
+        namespace = input("Enter namespace: ")
+        print(f"\nGetting logs for pod {pod_name} in namespace {namespace}...")
+        subprocess.run(f"kubectl logs {pod_name} -n {namespace}", shell=True)
+    elif choice == "8":
+        print("\nAvailable contexts:")
+        subprocess.run("kubectl config get-contexts", shell=True)
+        context = input("\nEnter context name to switch to: ")
+        print(f"\nSwitching to context {context}...")
+        subprocess.run(f"kubectl config use-context {context}", shell=True)
+    elif choice == "9":
+        return
+    else:
+        print("Invalid choice.")
+
 def main():
     print(LOGO)
     
@@ -422,10 +558,12 @@ def main():
             print("4. Launch applications")
             print("5. Install DevOps tools")
             print("6. Git Helper")
-            print("7. Edit configuration")
-            print("8. Exit")
+            print("7. Docker Helper")
+            print("8. Kubernetes Helper")
+            print("9. Edit configuration")
+            print("10. Exit")
             
-            choice = input("\nEnter your choice (1-8): ")
+            choice = input("\nEnter your choice (1-10): ")
             
             if choice == "1":
                 clean_workspace(config)
@@ -440,10 +578,14 @@ def main():
             elif choice == "6":
                 git_helper()
             elif choice == "7":
+                docker_helper()
+            elif choice == "8":
+                kubernetes_helper()
+            elif choice == "9":
                 config_path = os.path.abspath(CONFIG_FILE)
                 print(f"Opening configuration file: {config_path}")
                 os.system(f"notepad {config_path}")
-            elif choice == "8":
+            elif choice == "10":
                 print("\nThank you for using DevWizard! ✨")
                 break
             else:
