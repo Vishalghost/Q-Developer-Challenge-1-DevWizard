@@ -236,54 +236,85 @@ def monitor_system():
     """Monitor system resources"""
     print("📊 System Monitor")
     
-    # CPU usage
+    # CPU usage using PowerShell
     try:
-        cpu_result = subprocess.run(["wmic", "cpu", "get", "loadpercentage"], 
-                                   capture_output=True, text=True)
-        cpu_lines = cpu_result.stdout.strip().split('\n')
-        cpu_usage = cpu_lines[1].strip() if len(cpu_lines) > 1 else "N/A"
+        ps_cmd = "powershell -Command \"Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average\""
+        cpu_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
+        cpu_usage = cpu_result.stdout.strip()
         print(f"  CPU Usage: {cpu_usage}%")
-    except:
-        print("  CPU Usage: Unable to retrieve")
+    except Exception as e:
+        print(f"  CPU Usage: Unable to retrieve ({str(e)})")
     
-    # Memory usage
+    # Memory usage using PowerShell
     try:
-        mem_result = subprocess.run(["wmic", "OS", "get", "FreePhysicalMemory,TotalVisibleMemorySize"], 
-                                   capture_output=True, text=True)
-        mem_lines = mem_result.stdout.strip().split('\n')
-        if len(mem_lines) > 1:
-            mem_values = mem_lines[1].split()
-            if len(mem_values) >= 2:
-                free_mem = int(mem_values[0]) / 1024  # Convert to MB
-                total_mem = int(mem_values[1]) / 1024  # Convert to MB
-                used_mem = total_mem - free_mem
-                mem_percent = (used_mem / total_mem) * 100
-                print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.0f} MB / {total_mem:.0f} MB)")
-    except:
-        print("  Memory Usage: Unable to retrieve")
-    
-    # Disk usage
-    try:
-        disk_result = subprocess.run(["wmic", "logicaldisk", "get", "deviceid,freespace,size"], 
-                                    capture_output=True, text=True)
-        disk_lines = disk_result.stdout.strip().split('\n')
+        ps_cmd = "powershell -Command \""
+        ps_cmd += "$os = Get-CimInstance Win32_OperatingSystem; "
+        ps_cmd += "$total = $os.TotalVisibleMemorySize / 1024; "
+        ps_cmd += "$free = $os.FreePhysicalMemory / 1024; "
+        ps_cmd += "$used = $total - $free; "
+        ps_cmd += "$percent = ($used / $total) * 100; "
+        ps_cmd += "Write-Output \\\"\\\"{0:N1}|{1:N0}|{2:N0}\\\"\\\"\""
+        ps_cmd += " -f $percent,$used,$total"
+        ps_cmd += "\""
         
-        if len(disk_lines) > 1:
-            print("  Disk Usage:")
-            for line in disk_lines[1:]:  # Skip header
-                parts = line.split()
-                if len(parts) >= 3 and parts[0] and parts[1] and parts[2]:
-                    try:
-                        drive = parts[0]
-                        free_space = int(parts[1]) / (1024**3)  # Convert to GB
-                        total_space = int(parts[2]) / (1024**3)  # Convert to GB
-                        used_space = total_space - free_space
-                        usage_percent = (used_space / total_space) * 100 if total_space > 0 else 0
-                        print(f"    {drive}: {usage_percent:.1f}% used ({used_space:.1f} GB / {total_space:.1f} GB)")
-                    except:
-                        pass
-    except:
-        print("  Disk Usage: Unable to retrieve")
+        mem_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
+        mem_values = mem_result.stdout.strip().split('|')
+        
+        if len(mem_values) == 3:
+            mem_percent = float(mem_values[0])
+            used_mem = float(mem_values[1])
+            total_mem = float(mem_values[2])
+            print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.0f} MB / {total_mem:.0f} MB)")
+        else:
+            print("  Memory Usage: Unable to parse result")
+    except Exception as e:
+        print(f"  Memory Usage: Unable to retrieve ({str(e)})")
+    
+    # Disk usage using PowerShell
+    try:
+        ps_cmd = "powershell -Command \"Get-CimInstance Win32_LogicalDisk | Select-Object DeviceID,FreeSpace,Size | ConvertTo-Json\""
+        disk_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
+        
+        # Try to parse JSON output
+        import json
+        disks = json.loads(disk_result.stdout)
+        
+        # Handle case where only one disk is returned (not in an array)
+        if not isinstance(disks, list):
+            disks = [disks]
+        
+        print("  Disk Usage:")
+        for disk in disks:
+            if disk.get('Size'):
+                drive = disk.get('DeviceID')
+                free_space = int(disk.get('FreeSpace', 0)) / (1024**3)  # Convert to GB
+                total_space = int(disk.get('Size', 1)) / (1024**3)  # Convert to GB
+                used_space = total_space - free_space
+                usage_percent = (used_space / total_space) * 100 if total_space > 0 else 0
+                print(f"    {drive}: {usage_percent:.1f}% used ({used_space:.1f} GB / {total_space:.1f} GB)")
+    except Exception as e:
+        print(f"  Disk Usage: Unable to retrieve ({str(e)})")
+        
+    # Network connections
+    try:
+        ps_cmd = "powershell -Command \"(Get-NetTCPConnection -State Established).Count\""
+        established = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
+        
+        ps_cmd = "powershell -Command \"(Get-NetTCPConnection -State Listen).Count\""
+        listening = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
+        
+        print(f"  Network: {established} established, {listening} listening connections")
+    except Exception as e:
+        print(f"  Network: Unable to retrieve ({str(e)})")
+        
+    # Process count
+    try:
+        ps_cmd = "powershell -Command \"(Get-Process).Count\""
+        process_count = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
+        print(f"  Processes: {process_count} running")
+    except Exception as e:
+        print(f"  Processes: Unable to retrieve ({str(e)})")
+
 
 def launch_apps(config):
     """Launch configured applications"""
