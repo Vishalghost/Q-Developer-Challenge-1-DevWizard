@@ -40,10 +40,17 @@ cd Q-Developer-Challenge-1-DevWizard
 pip install -e .
 ```
 
-After installation, you can run DevWizard from anywhere by simply typing:
+After installation, you can run DevWizard using any of these methods:
 
 ```
+# Method 1: Run as a command (if PATH is set up correctly)
 devwizard
+
+# Method 2: Run as a Python module
+python -m devwizard
+
+# Method 3: Run the script directly
+python path/to/devwizard/devwizard.py
 ```
 
 ### Option 2: Install from PyPI (Coming Soon)
