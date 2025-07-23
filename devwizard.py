@@ -236,84 +236,59 @@ def monitor_system():
     """Monitor system resources"""
     print("📊 System Monitor")
     
-    # CPU usage using PowerShell
+    # Simple CPU usage
     try:
-        ps_cmd = "powershell -Command \"Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average\""
+        ps_cmd = "powershell -Command ""Get-Counter '\\Processor(_Total)\\% Processor Time' | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue"""
         cpu_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
-        cpu_usage = cpu_result.stdout.strip()
-        print(f"  CPU Usage: {cpu_usage}%")
-    except Exception as e:
-        print(f"  CPU Usage: Unable to retrieve ({str(e)})")
+        cpu_usage = float(cpu_result.stdout.strip())
+        print(f"  CPU Usage: {cpu_usage:.1f}%")
+    except:
+        print("  CPU Usage: Unable to retrieve")
     
-    # Memory usage using PowerShell
+    # Simple memory usage
     try:
-        ps_cmd = "powershell -Command \""
-        ps_cmd += "$os = Get-CimInstance Win32_OperatingSystem; "
-        ps_cmd += "$total = $os.TotalVisibleMemorySize / 1024; "
-        ps_cmd += "$free = $os.FreePhysicalMemory / 1024; "
-        ps_cmd += "$used = $total - $free; "
-        ps_cmd += "$percent = ($used / $total) * 100; "
-        ps_cmd += "Write-Output \\\"\\\"{0:N1}|{1:N0}|{2:N0}\\\"\\\"\""
-        ps_cmd += " -f $percent,$used,$total"
-        ps_cmd += "\""
+        ps_cmd = "powershell -Command ""$CompObject = Get-WmiObject -Class WIN32_OperatingSystem; "
+        ps_cmd += "$TotalMemory = [math]::round($CompObject.TotalVisibleMemorySize / 1MB, 2); "
+        ps_cmd += "$FreeMemory = [math]::round($CompObject.FreePhysicalMemory / 1MB, 2); "
+        ps_cmd += "$UsedMemory = $TotalMemory - $FreeMemory; "
+        ps_cmd += "$MemoryUsage = [math]::round(($UsedMemory / $TotalMemory) * 100, 2); "
+        ps_cmd += "Write-Output \"$MemoryUsage,$UsedMemory,$TotalMemory\""""
         
         mem_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
-        mem_values = mem_result.stdout.strip().split('|')
+        mem_values = mem_result.stdout.strip().split(',')
         
-        if len(mem_values) == 3:
-            mem_percent = float(mem_values[0])
-            used_mem = float(mem_values[1])
-            total_mem = float(mem_values[2])
-            print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.0f} MB / {total_mem:.0f} MB)")
-        else:
-            print("  Memory Usage: Unable to parse result")
-    except Exception as e:
-        print(f"  Memory Usage: Unable to retrieve ({str(e)})")
+        mem_percent = float(mem_values[0])
+        used_mem = float(mem_values[1])
+        total_mem = float(mem_values[2])
+        print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.1f} GB / {total_mem:.1f} GB)")
+    except:
+        print("  Memory Usage: Unable to retrieve")
     
-    # Disk usage using PowerShell
+    # Simple disk usage
     try:
-        ps_cmd = "powershell -Command \"Get-CimInstance Win32_LogicalDisk | Select-Object DeviceID,FreeSpace,Size | ConvertTo-Json\""
+        ps_cmd = "powershell -Command ""Get-PSDrive -PSProvider FileSystem | ForEach-Object {$_.Name + ',' + [math]::Round(($_.Used/($_.Used+$_.Free))*100,1) + ',' + [math]::Round($_.Used/1GB,1) + ',' + [math]::Round(($_.Used+$_.Free)/1GB,1)}"""
         disk_result = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True)
-        
-        # Try to parse JSON output
-        import json
-        disks = json.loads(disk_result.stdout)
-        
-        # Handle case where only one disk is returned (not in an array)
-        if not isinstance(disks, list):
-            disks = [disks]
+        disk_lines = disk_result.stdout.strip().split('\n')
         
         print("  Disk Usage:")
-        for disk in disks:
-            if disk.get('Size'):
-                drive = disk.get('DeviceID')
-                free_space = int(disk.get('FreeSpace', 0)) / (1024**3)  # Convert to GB
-                total_space = int(disk.get('Size', 1)) / (1024**3)  # Convert to GB
-                used_space = total_space - free_space
-                usage_percent = (used_space / total_space) * 100 if total_space > 0 else 0
+        for line in disk_lines:
+            parts = line.split(',')
+            if len(parts) == 4:
+                drive = parts[0] + ":"
+                usage_percent = float(parts[1])
+                used_space = float(parts[2])
+                total_space = float(parts[3])
                 print(f"    {drive}: {usage_percent:.1f}% used ({used_space:.1f} GB / {total_space:.1f} GB)")
-    except Exception as e:
-        print(f"  Disk Usage: Unable to retrieve ({str(e)})")
-        
-    # Network connections
+    except:
+        print("  Disk Usage: Unable to retrieve")
+    
+    # Simple process count
     try:
-        ps_cmd = "powershell -Command \"(Get-NetTCPConnection -State Established).Count\""
-        established = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
-        
-        ps_cmd = "powershell -Command \"(Get-NetTCPConnection -State Listen).Count\""
-        listening = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
-        
-        print(f"  Network: {established} established, {listening} listening connections")
-    except Exception as e:
-        print(f"  Network: Unable to retrieve ({str(e)})")
-        
-    # Process count
-    try:
-        ps_cmd = "powershell -Command \"(Get-Process).Count\""
+        ps_cmd = "powershell -Command ""(Get-Process).Count"""
         process_count = subprocess.run(ps_cmd, capture_output=True, text=True, shell=True).stdout.strip()
         print(f"  Processes: {process_count} running")
-    except Exception as e:
-        print(f"  Processes: Unable to retrieve ({str(e)})")
+    except:
+        print("  Processes: Unable to retrieve")
 
 
 def launch_apps(config):
