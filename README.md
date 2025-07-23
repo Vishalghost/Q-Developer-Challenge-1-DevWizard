@@ -29,20 +29,29 @@ A magical CLI tool for cloud and DevOps engineers to streamline your Windows wor
 
 1. Ensure you have Python 3.6+ installed
 2. Clone this repository
-3. Run the tool:
+3. Install required tools (optional):
+   - Git for Windows (for Git helper)
+   - Docker Desktop (for Docker helper)
+   - kubectl (for Kubernetes helper)
+   - AWS CLI (for AWS helper)
+4. Run the tool:
    ```
    python devwizard.py
    ```
 
 ## Usage
 
-Run the interactive menu:
+### Basic Usage
 
-```
-python devwizard.py
-```
+1. Open a command prompt or PowerShell window
+2. Navigate to the directory containing devwizard.py
+3. Run the tool: `python devwizard.py`
+4. Use the interactive menu to select the feature you want to use
+5. Follow the on-screen prompts for each feature
 
-Or use specific features:
+### Command Line Options
+
+You can also run specific features directly from the command line:
 
 ```
 python devwizard.py --clean     # Clean workspace
@@ -52,6 +61,28 @@ python devwizard.py --launch    # Launch applications
 python devwizard.py --install   # Install DevOps tools
 python devwizard.py --config    # Edit configuration
 ```
+
+### Using the Helpers
+
+#### Git Helper
+1. Select "Git Helper" from the main menu
+2. Choose the Git operation you want to perform
+3. Follow the prompts to provide repository paths, commit messages, etc.
+
+#### Docker Helper
+1. Select "Docker Helper" from the main menu
+2. Choose the Docker operation you want to perform
+3. Follow the prompts to provide container names, image names, etc.
+
+#### Kubernetes Helper
+1. Select "Kubernetes Helper" from the main menu
+2. Choose the Kubernetes operation you want to perform
+3. Follow the prompts to provide namespace, resource types, etc.
+
+#### AWS Helper
+1. Select "AWS Helper" from the main menu
+2. Choose the AWS operation you want to perform
+3. Follow the prompts to provide instance IDs, profile names, etc.
 
 ## DevOps Features
 
