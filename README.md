@@ -23,6 +23,7 @@ A magical CLI tool for cloud and DevOps engineers to streamline your Windows wor
 - **Git Helper**: Streamline common Git operations (init, clone, commit, push)
 - **Docker Helper**: Manage containers and images with ease
 - **Kubernetes Helper**: Simplify kubectl commands and cluster management
+- **AWS Helper**: Manage EC2, S3, Lambda, and other AWS resources
 
 ## Installation
 
@@ -73,6 +74,12 @@ python devwizard.py --config    # Edit configuration
 - Apply YAML files
 - Get logs
 - Switch contexts
+
+### AWS Helper
+- List EC2 instances, S3 buckets, and Lambda functions
+- Describe and manage EC2 instances
+- Switch between AWS profiles
+- Check AWS service status
 
 ## System Features
 

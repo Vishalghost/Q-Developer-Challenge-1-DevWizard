@@ -441,6 +441,58 @@ def kubernetes_helper():
     print("7. Get logs")
     print("8. Switch context")
     print("9. Return to main menu")
+
+def aws_helper():
+    """AWS helper function"""
+    print("☁️ AWS Helper")
+    print("\n1. List EC2 instances")
+    print("2. List S3 buckets")
+    print("3. List Lambda functions")
+    print("4. Describe EC2 instance")
+    print("5. Start EC2 instance")
+    print("6. Stop EC2 instance")
+    print("7. Switch AWS profile")
+    print("8. Check AWS service status")
+    print("9. Return to main menu")
+    
+    choice = input("\nEnter your choice (1-9): ")
+    
+    if choice == "1":
+        print("\nListing EC2 instances...")
+        subprocess.run("aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,InstanceType,PublicIpAddress]' --output table", shell=True)
+    elif choice == "2":
+        print("\nListing S3 buckets...")
+        subprocess.run("aws s3 ls", shell=True)
+    elif choice == "3":
+        print("\nListing Lambda functions...")
+        subprocess.run("aws lambda list-functions --query 'Functions[*].[FunctionName,Runtime,Timeout,MemorySize]' --output table", shell=True)
+    elif choice == "4":
+        instance_id = input("Enter EC2 instance ID: ")
+        print(f"\nDescribing EC2 instance {instance_id}...")
+        subprocess.run(f"aws ec2 describe-instances --instance-ids {instance_id}", shell=True)
+    elif choice == "5":
+        instance_id = input("Enter EC2 instance ID: ")
+        print(f"\nStarting EC2 instance {instance_id}...")
+        subprocess.run(f"aws ec2 start-instances --instance-ids {instance_id}", shell=True)
+    elif choice == "6":
+        instance_id = input("Enter EC2 instance ID: ")
+        print(f"\nStopping EC2 instance {instance_id}...")
+        subprocess.run(f"aws ec2 stop-instances --instance-ids {instance_id}", shell=True)
+    elif choice == "7":
+        print("\nAvailable AWS profiles:")
+        subprocess.run("aws configure list-profiles", shell=True)
+        profile = input("\nEnter profile name to switch to: ")
+        print(f"\nSwitching to profile {profile}...")
+        os.environ["AWS_PROFILE"] = profile
+        print(f"AWS_PROFILE environment variable set to {profile}")
+        print("Note: This only affects the current session")
+    elif choice == "8":
+        print("\nChecking AWS service status...")
+        subprocess.run("aws health describe-events --filter eventTypeCategories=issue --region us-east-1", shell=True)
+    elif choice == "9":
+        return
+    else:
+        print("Invalid choice.")
     
     choice = input("\nEnter your choice (1-9): ")
     
@@ -560,10 +612,11 @@ def main():
             print("6. Git Helper")
             print("7. Docker Helper")
             print("8. Kubernetes Helper")
-            print("9. Edit configuration")
-            print("10. Exit")
+            print("9. AWS Helper")
+            print("10. Edit configuration")
+            print("11. Exit")
             
-            choice = input("\nEnter your choice (1-10): ")
+            choice = input("\nEnter your choice (1-11): ")
             
             if choice == "1":
                 clean_workspace(config)
@@ -582,10 +635,12 @@ def main():
             elif choice == "8":
                 kubernetes_helper()
             elif choice == "9":
+                aws_helper()
+            elif choice == "10":
                 config_path = os.path.abspath(CONFIG_FILE)
                 print(f"Opening configuration file: {config_path}")
                 os.system(f"notepad {config_path}")
-            elif choice == "10":
+            elif choice == "11":
                 print("\nThank you for using DevWizard! ✨")
                 break
             else:
