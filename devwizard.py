@@ -248,8 +248,8 @@ def monitor_system():
     # Simple memory usage
     try:
         ps_cmd = "powershell -Command ""$CompObject = Get-WmiObject -Class WIN32_OperatingSystem; "
-        ps_cmd += "$TotalMemory = [math]::round($CompObject.TotalVisibleMemorySize / 1MB, 2); "
-        ps_cmd += "$FreeMemory = [math]::round($CompObject.FreePhysicalMemory / 1MB, 2); "
+        ps_cmd += "$TotalMemory = [math]::round($CompObject.TotalVisibleMemorySize / 1024, 0); "
+        ps_cmd += "$FreeMemory = [math]::round($CompObject.FreePhysicalMemory / 1024, 0); "
         ps_cmd += "$UsedMemory = $TotalMemory - $FreeMemory; "
         ps_cmd += "$MemoryUsage = [math]::round(($UsedMemory / $TotalMemory) * 100, 2); "
         ps_cmd += "Write-Output \"$MemoryUsage,$UsedMemory,$TotalMemory\""""
@@ -260,7 +260,7 @@ def monitor_system():
         mem_percent = float(mem_values[0])
         used_mem = float(mem_values[1])
         total_mem = float(mem_values[2])
-        print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.1f} GB / {total_mem:.1f} GB)")
+        print(f"  Memory Usage: {mem_percent:.1f}% ({used_mem:.0f} MB / {total_mem:.0f} MB)")
     except:
         print("  Memory Usage: Unable to retrieve")
     
