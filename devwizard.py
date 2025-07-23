@@ -267,13 +267,52 @@ def install_tools():
     """Install missing DevOps tools"""
     print("🔄 Installing DevOps tools...")
     
+    # Define available tools for installation
+    available_tools = {
+        "1": {"name": "Git", "selected": True},
+        "2": {"name": "Docker & WSL2", "selected": True},
+        "3": {"name": "kubectl", "selected": True},
+        "4": {"name": "Terraform", "selected": False},
+        "5": {"name": "AWS CLI", "selected": False},
+        "6": {"name": "Azure CLI", "selected": False},
+        "7": {"name": "Google Cloud SDK", "selected": False},
+        "8": {"name": "Ansible", "selected": False},
+        "9": {"name": "Helm", "selected": False},
+        "10": {"name": "Node.js & npm", "selected": False},
+        "11": {"name": "Python", "selected": False}
+    }
+    
+    # Let user select tools to install
+    print("\nSelect tools to install (core tools are selected by default):")
+    for key, tool in available_tools.items():
+        status = "[X]" if tool["selected"] else "[ ]"
+        print(f"  {status} {key}. {tool['name']}")
+    
+    print("\nEnter tool numbers to toggle selection (e.g., '4 5 7' to select/deselect those tools)")
+    print("Or press Enter to continue with current selection")
+    
+    selection = input("> ").strip()
+    if selection:
+        for num in selection.split():
+            if num in available_tools:
+                available_tools[num]["selected"] = not available_tools[num]["selected"]
+    
+    # Show final selection
+    print("\nSelected tools to install:")
+    selected_tools = [tool["name"] for tool in available_tools.values() if tool["selected"]]
+    for tool in selected_tools:
+        print(f"  - {tool}")
+    
+    confirm = input("\nProceed with installation? (y/n): ").lower()
+    if confirm != 'y':
+        print("Installation cancelled.")
+        return
+    
     # Path to the installation script
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "install_tools.ps1")
     
-    # Check if the script exists
-    if not os.path.exists(script_path):
-        print("  Installation script not found. Creating it...")
-        create_install_script(script_path)
+    # Create the installation script with selected tools
+    create_install_script(script_path, selected_tools)
     
     # Run the installation script with admin privileges
     print("  Launching installer with admin privileges...")
@@ -287,22 +326,32 @@ def install_tools():
     print("  Installation started in a new window.")
     input("  Press Enter when installation is complete...")
 
-def create_install_script(path):
+def create_install_script(path, selected_tools=None):
     """Create the PowerShell installation script"""
-    with open(path, 'w') as f:
-        f.write("""# DevOps Tools Installer
+    if selected_tools is None:
+        selected_tools = ["Git", "Docker & WSL2", "kubectl"]
+    
+    script_content = """# DevOps Tools Installer
 # Run this script as Administrator
 
 Write-Host "DevOps Tools Installer" -ForegroundColor Cyan
 Write-Host "====================" -ForegroundColor Cyan
-
+"""
+    
+    # Git installation
+    if "Git" in selected_tools:
+        script_content += """
 # Install Git
 Write-Host "`nInstalling Git..." -ForegroundColor Yellow
 $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.40.0.windows.1/Git-2.40.0-64-bit.exe"
 $gitInstallerPath = "$env:TEMP\\git-installer.exe"
 Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstallerPath -UseBasicParsing
 Start-Process -FilePath $gitInstallerPath -Wait
-
+"""
+    
+    # Docker & WSL2 installation
+    if "Docker & WSL2" in selected_tools:
+        script_content += """
 # Enable WSL2 features
 Write-Host "`nEnabling WSL2 features..." -ForegroundColor Yellow
 dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
@@ -325,7 +374,11 @@ $dockerUrl = "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Insta
 $dockerInstallerPath = "$env:TEMP\\DockerDesktopInstaller.exe"
 Invoke-WebRequest -Uri $dockerUrl -OutFile $dockerInstallerPath -UseBasicParsing
 Start-Process -FilePath $dockerInstallerPath -Wait
-
+"""
+    
+    # kubectl installation
+    if "kubectl" in selected_tools:
+        script_content += """
 # Install kubectl
 Write-Host "`nInstalling kubectl..." -ForegroundColor Yellow
 $version = (Invoke-RestMethod "https://storage.googleapis.com/kubernetes-release/release/stable.txt")
@@ -337,11 +390,123 @@ $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($currentPath -notlike "*$env:USERPROFILE\\.kubectl*") {
     [Environment]::SetEnvironmentVariable("Path", $currentPath + ";$env:USERPROFILE\\.kubectl", "User")
 }
+"""
+    
+    # Terraform installation
+    if "Terraform" in selected_tools:
+        script_content += """
+# Install Terraform
+Write-Host "`nInstalling Terraform..." -ForegroundColor Yellow
+$terraformUrl = "https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_windows_amd64.zip"
+$terraformZipPath = "$env:TEMP\\terraform.zip"
+$terraformDir = "$env:USERPROFILE\\.terraform"
+
+Invoke-WebRequest -Uri $terraformUrl -OutFile $terraformZipPath -UseBasicParsing
+Expand-Archive -Path $terraformZipPath -DestinationPath $terraformDir -Force
+
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($currentPath -notlike "*$terraformDir*") {
+    [Environment]::SetEnvironmentVariable("Path", $currentPath + ";$terraformDir", "User")
+}
+"""
+    
+    # AWS CLI installation
+    if "AWS CLI" in selected_tools:
+        script_content += """
+# Install AWS CLI
+Write-Host "`nInstalling AWS CLI..." -ForegroundColor Yellow
+$awsCliUrl = "https://awscli.amazonaws.com/AWSCLIV2.msi"
+$awsCliInstallerPath = "$env:TEMP\\AWSCLIV2.msi"
+
+Invoke-WebRequest -Uri $awsCliUrl -OutFile $awsCliInstallerPath -UseBasicParsing
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$awsCliInstallerPath`" /quiet" -Wait
+"""
+    
+    # Azure CLI installation
+    if "Azure CLI" in selected_tools:
+        script_content += """
+# Install Azure CLI
+Write-Host "`nInstalling Azure CLI..." -ForegroundColor Yellow
+$azureCliUrl = "https://aka.ms/installazurecliwindows"
+$azureCliInstallerPath = "$env:TEMP\\AzureCLI.msi"
+
+Invoke-WebRequest -Uri $azureCliUrl -OutFile $azureCliInstallerPath -UseBasicParsing
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$azureCliInstallerPath`" /quiet" -Wait
+"""
+    
+    # Google Cloud SDK installation
+    if "Google Cloud SDK" in selected_tools:
+        script_content += """
+# Install Google Cloud SDK
+Write-Host "`nInstalling Google Cloud SDK..." -ForegroundColor Yellow
+$gcloudUrl = "https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe"
+$gcloudInstallerPath = "$env:TEMP\\GoogleCloudSDKInstaller.exe"
+
+Invoke-WebRequest -Uri $gcloudUrl -OutFile $gcloudInstallerPath -UseBasicParsing
+Start-Process -FilePath $gcloudInstallerPath -Wait
+"""
+    
+    # Ansible installation
+    if "Ansible" in selected_tools:
+        script_content += """
+# Install Ansible (requires Python)
+Write-Host "`nInstalling Ansible..." -ForegroundColor Yellow
+Start-Process -FilePath "pip" -ArgumentList "install ansible" -Wait
+"""
+    
+    # Helm installation
+    if "Helm" in selected_tools:
+        script_content += """
+# Install Helm
+Write-Host "`nInstalling Helm..." -ForegroundColor Yellow
+$helmUrl = "https://get.helm.sh/helm-v3.12.0-windows-amd64.zip"
+$helmZipPath = "$env:TEMP\\helm.zip"
+$helmDir = "$env:USERPROFILE\\.helm"
+
+Invoke-WebRequest -Uri $helmUrl -OutFile $helmZipPath -UseBasicParsing
+New-Item -ItemType Directory -Force -Path $helmDir
+Expand-Archive -Path $helmZipPath -DestinationPath $helmDir -Force
+
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($currentPath -notlike "*$helmDir\\windows-amd64*") {
+    [Environment]::SetEnvironmentVariable("Path", $currentPath + ";$helmDir\\windows-amd64", "User")
+}
+"""
+    
+    # Node.js & npm installation
+    if "Node.js & npm" in selected_tools:
+        script_content += """
+# Install Node.js & npm
+Write-Host "`nInstalling Node.js & npm..." -ForegroundColor Yellow
+$nodeUrl = "https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi"
+$nodeInstallerPath = "$env:TEMP\\node-installer.msi"
+
+Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeInstallerPath -UseBasicParsing
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$nodeInstallerPath`" /quiet" -Wait
+"""
+    
+    # Python installation
+    if "Python" in selected_tools:
+        script_content += """
+# Install Python
+Write-Host "`nInstalling Python..." -ForegroundColor Yellow
+$pythonUrl = "https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe"
+$pythonInstallerPath = "$env:TEMP\\python-installer.exe"
+
+Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonInstallerPath -UseBasicParsing
+Start-Process -FilePath $pythonInstallerPath -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+"""
+    
+    # Completion message
+    script_content += """
 
 Write-Host "`nInstallation completed!" -ForegroundColor Green
 Write-Host "NOTE: You need to restart your computer for all changes to take effect." -ForegroundColor Yellow
 Read-Host "Press Enter to exit"
-""")
+"""
+    
+    with open(path, 'w') as f:
+        f.write(script_content)
 
 def monitor_system():
     """Monitor system resources"""

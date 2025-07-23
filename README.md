@@ -19,7 +19,7 @@ A magical CLI tool for cloud and DevOps engineers to streamline your Windows wor
 - **DevOps Tools Check**: Verify if Git, Docker, kubectl, Terraform, AWS CLI, Ansible, and many other DevOps tools are installed
 - **System Monitoring**: Check CPU, memory, and disk usage in real-time
 - **Application Launcher**: Start your development tools with one command
-- **Tool Installer**: Easily install Git, Docker, and kubectl
+- **Tool Installer**: Easily install Git, Docker, kubectl, Terraform, AWS CLI, and other DevOps tools with a customizable selection
 - **Git Helper**: Streamline common Git operations (init, clone, commit, push)
 - **Docker Helper**: Manage containers and images with ease
 - **Kubernetes Helper**: Simplify kubectl commands and cluster management
