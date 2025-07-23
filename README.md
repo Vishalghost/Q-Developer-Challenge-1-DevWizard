@@ -127,3 +127,7 @@ python devwizard.py --config    # Edit configuration
 ## Created with Amazon Q Developer
 
 This tool was created with assistance from Amazon Q Developer.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
