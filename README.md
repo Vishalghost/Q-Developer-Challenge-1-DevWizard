@@ -27,10 +27,17 @@ A magical CLI tool for cloud and DevOps engineers to streamline your workflow ac
 
 ## Installation
 
-### Option 1: Install from PyPI (Recommended)
+### Option 1: Install from GitHub
 
 ```
-pip install devwizard
+# Clone the repository
+git clone https://github.com/Vishalghost/Q-Developer-Challenge-1-DevWizard.git
+
+# Navigate to the directory
+cd Q-Developer-Challenge-1-DevWizard
+
+# Install DevWizard
+pip install -e .
 ```
 
 After installation, you can run DevWizard from anywhere by simply typing:
@@ -39,14 +46,11 @@ After installation, you can run DevWizard from anywhere by simply typing:
 devwizard
 ```
 
-### Option 2: Install from Source
+### Option 2: Install from PyPI (Coming Soon)
 
-1. Ensure you have Python 3.6+ installed
-2. Clone this repository
-3. Install in development mode:
-   ```
-   pip install -e .
-   ```
+```
+pip install devwizard
+```
 
 ### Required Tools (Optional)
 
@@ -60,23 +64,22 @@ DevWizard can help you install these tools, but they're required for certain fea
 
 ### Basic Usage
 
-1. Open a command prompt or PowerShell window
-2. Navigate to the directory containing devwizard.py
-3. Run the tool: `python devwizard.py`
-4. Use the interactive menu to select the feature you want to use
-5. Follow the on-screen prompts for each feature
+1. Open a command prompt, PowerShell, or terminal window
+2. Run the tool: `devwizard`
+3. Use the interactive menu to select the feature you want to use
+4. Follow the on-screen prompts for each feature
 
 ### Command Line Options
 
 You can also run specific features directly from the command line:
 
 ```
-python devwizard.py --clean     # Clean workspace
-python devwizard.py --check     # Check DevOps tools
-python devwizard.py --monitor   # Monitor system resources
-python devwizard.py --launch    # Launch applications
-python devwizard.py --install   # Install DevOps tools
-python devwizard.py --config    # Edit configuration
+devwizard --clean     # Clean workspace
+devwizard --check     # Check DevOps tools
+devwizard --monitor   # Monitor system resources
+devwizard --launch    # Launch applications
+devwizard --install   # Install DevOps tools
+devwizard --config    # Edit configuration
 ```
 
 ### Using the Helpers
