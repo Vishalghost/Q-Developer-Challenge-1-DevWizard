@@ -1,29 +1,34 @@
-# Dev Assistant for Cloud & DevOps
+# DevWizard 🧙‍♂️
 
-A CLI automation tool built with Amazon Q Developer to streamline your Windows workflow for cloud and DevOps engineers. Automate routine tasks, manage AWS resources, and control DevOps tools from a single interface.
+A magical CLI tool for cloud and DevOps engineers to streamline your Windows workflow.
+
+```
+ _____              _    _ _                       _ 
+|  __ \            | |  | (_)                     | |
+| |  | | _____   __| |  | |_ ______ _ _ __ __ _  | |
+| |  | |/ _ \ \ / /| |/\| | |_  / _` | '__/ _` | | |
+| |__| |  __/\ V / \  /\  / |/ / (_| | | | (_| | |_|
+|_____/ \___| \_/   \/  \/|_/___\__,_|_|  \__,_| (_)
+                                                   
+        Your Magical DevOps Assistant - v1.0.0
+```
 
 ## Features
 
-- **Disk Cleanup**: Removes temporary files based on age and extension
-- **File Organization**: Automatically sorts files into folders based on file types
-- **Application Launcher**: Starts your daily development tools with one command
-- **AWS Resource Manager**: Manage EC2 instances, S3 buckets, and monitor AWS costs
-- **DevOps Tools**: Control Docker containers, Git repositories, and Kubernetes clusters
-- **System Monitoring**: Check service status and resource usage
+- **Workspace Cleanup**: Remove temporary files with a single command
+- **DevOps Tools Check**: Verify if Git, Docker, and kubectl are installed
+- **System Monitoring**: Check CPU, memory, and disk usage
+- **Application Launcher**: Start your development tools with one command
+- **Tool Installer**: Easily install Git, Docker, and kubectl
+- **Git Helper**: Streamline common Git operations
 
 ## Installation
 
 1. Ensure you have Python 3.6+ installed
-2. Clone or download this repository
-3. Run the tool and use the built-in installer:
+2. Clone this repository
+3. Run the tool:
    ```
-   python dev_assistant.py
-   ```
-   Then select option 6 "Install DevOps Tools" from the menu
-
-4. Alternatively, install dependencies manually:
-   ```
-   pip install boto3
+   python devwizard.py
    ```
 
 ## Usage
@@ -31,53 +36,18 @@ A CLI automation tool built with Amazon Q Developer to streamline your Windows w
 Run the interactive menu:
 
 ```
-python dev_assistant.py
+python devwizard.py
 ```
 
 Or use specific features:
 
 ```
-python dev_assistant.py --clean     # Only clean temporary files
-python dev_assistant.py --organize  # Only organize files
-python dev_assistant.py --launch    # Only launch applications
-python dev_assistant.py --aws       # Manage AWS resources
-python dev_assistant.py --devops    # Manage DevOps tools
-python dev_assistant.py --config    # Edit configuration file
-```
-
-## AWS Features
-
-- List and manage EC2 instances
-- Browse S3 buckets
-- Check AWS service health
-- Deploy CloudFormation stacks
-- Run Terraform plans
-- Monitor AWS costs
-- Switch between AWS profiles
-
-## DevOps Features
-
-- Manage Docker containers
-- Check Git repositories
-- Run Kubernetes commands
-- Monitor system services
-- Track resource usage
-- Install required DevOps tools (Git, Docker, kubectl)
-
-## Configuration
-
-Edit the `config.json` file to customize:
-
-- Which directories to clean
-- File organization rules
-- Applications to launch
-- AWS settings and paths
-- DevOps tool configurations
-
-You can edit the configuration directly or use:
-
-```
-python dev_assistant.py --config
+python devwizard.py --clean     # Clean workspace
+python devwizard.py --check     # Check DevOps tools
+python devwizard.py --monitor   # Monitor system resources
+python devwizard.py --launch    # Launch applications
+python devwizard.py --install   # Install DevOps tools
+python devwizard.py --config    # Edit configuration
 ```
 
 ## Created with Amazon Q Developer
