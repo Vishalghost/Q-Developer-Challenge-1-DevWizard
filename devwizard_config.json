@@ -1,0 +1,34 @@
+{
+    "workspace": {
+        "cleanup_dirs": [
+            "%TEMP%",
+            "%USERPROFILE%\\Downloads"
+        ],
+        "cleanup_extensions": [
+            ".tmp",
+            ".log",
+            ".bak"
+        ],
+        "min_age_days": 7
+    },
+    "tools": {
+        "git_path": "C:\\Program Files\\Git\\bin\\git.exe",
+        "docker_path": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
+        "kubectl_path": "%USERPROFILE%\\.kubectl\\kubectl.exe"
+    },
+    "cloud": {
+        "aws_region": "us-east-1",
+        "aws_profile": "default",
+        "terraform_dir": "%USERPROFILE%\\terraform"
+    },
+    "apps": [
+        {
+            "name": "VS Code",
+            "path": "code"
+        },
+        {
+            "name": "Terminal",
+            "path": "wt"
+        }
+    ]
+}
