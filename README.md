@@ -27,25 +27,34 @@ A magical CLI tool for cloud and DevOps engineers to streamline your workflow ac
 
 ## Installation
 
+### Option 1: Install from PyPI (Recommended)
+
+```
+pip install devwizard
+```
+
+After installation, you can run DevWizard from anywhere by simply typing:
+
+```
+devwizard
+```
+
+### Option 2: Install from Source
+
 1. Ensure you have Python 3.6+ installed
 2. Clone this repository
-3. Install required Python dependencies:
+3. Install in development mode:
    ```
-   pip install -r requirements.txt
+   pip install -e .
    ```
-4. Install required tools (optional):
-   - Git (for Git helper)
-   - Docker (for Docker helper)
-   - kubectl (for Kubernetes helper)
-   - AWS CLI (for AWS helper)
-5. Run the tool:
-   ```
-   # On Windows
-   python devwizard.py
-   
-   # On macOS/Linux
-   python3 devwizard.py
-   ```
+
+### Required Tools (Optional)
+
+DevWizard can help you install these tools, but they're required for certain features:
+- Git (for Git helper)
+- Docker (for Docker helper)
+- kubectl (for Kubernetes helper)
+- AWS CLI (for AWS helper)
 
 ## Usage
 
