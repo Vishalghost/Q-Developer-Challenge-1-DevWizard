@@ -27,15 +27,22 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # ASCII Art Logo
 LOGO = """
- _____              _    _ _                       _ 
-|  __ \            | |  | (_)                     | |
-| |  | | _____   __| |  | |_ ______ _ _ __ __ _  | |
-| |  | |/ _ \ \ / /| |/\| | |_  / _` | '__/ _` | | |
-| |__| |  __/\ V / \  /\  / |/ / (_| | | | (_| | |_|
-|_____/ \___| \_/   \/  \/|_/___\__,_|_|  \__,_| (_)
-                                                   
-        Your Magical DevOps Assistant - v1.0.0
+      *    .  *       .             *
+   .    *           .    .            
+        .     *  🧙‍♂️   .        *     .
+     .            *         .           
+  *        .  *         .        *      
+
+ ____              __        ___                  _ 
+|  _ \  _____   __ \ \      / (_)______ _ _ __ __| | 
+| | | |/ _ \ \ / /  \ \ /\ / /| |_  / _` | '__/ _` | 
+| |_| |  __/\ V /    \ V  V / | |/ / (_| | | | (_| |
+|____/ \___| \_/      \_/\_/  |_/___\__,_|_|  \__,_|
+
+    ⚡ Your Magical DevOps Assistant - v1.0.0 ⚡
+      🔮 Cast spells on your infrastructure! 🔮
 """
+
 
 def load_config():
     """Load configuration from config file"""
